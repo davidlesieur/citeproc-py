@@ -695,25 +695,27 @@ class Text(CitationStylesElement, Formatted, Affixed, Quoted, TextCased,
             en_dash = self.unicode_character('EN DASH')
             text = str(item.locator.identifier).replace('-', en_dash)
         elif variable == 'page-first':
-            text = str(item.reference.page.first)
+            text = str(item.reference.page[0].first)
         else:
             text = item.reference[variable.replace('-', '_')]
 
         return text
 
     def _page(self, item, context):
-        page = item.reference.page
-        str_first = str(page.first)
-        text = str_first
-        if 'last' in page:
-            str_last = str(page.last)
-            text += self.unicode_character('EN DASH')
-            if len(str_first) != len(str_last):
-                text += str_last
-            else:
-                range_fmt = self.get_root().get_option('page-range-format')
-                text += self._page_format_last(str_first, str_last, range_fmt)
-        return text
+        output = []
+        for page in item.reference.page:
+            str_first = str(page.first)
+            text = str_first
+            if 'last' in page:
+                str_last = str(page.last)
+                text += self.unicode_character('EN DASH')
+                if len(str_first) != len(str_last):
+                    text += str_last
+                else:
+                    range_fmt = self.get_root().get_option('page-range-format')
+                    text += self._page_format_last(str_first, str_last, range_fmt)
+            output.append(text)
+        return '; '.join(output)
 
     @staticmethod
     def _page_format_last(first, last, range_format):

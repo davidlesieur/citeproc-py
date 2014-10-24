@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from citeproc.py2compat import *
 
+import re
 import unicodedata
 
 from . import BibliographySource, Reference
@@ -67,14 +68,17 @@ class CiteProcJSON(BibliographySource):
         return output
 
     def parse_page(self, json_data):
+        pages = []
         json_data = json_data.replace(unicodedata.lookup('EN DASH'), '-')
-        if '-' in json_data:
-            first, last = (number.strip() for number in json_data.split('-'))
-            if len(last) < len(first):
-                last = first[:- len(last)] + last
-            return Pages(first=first, last=last)
-        else:
-            return Pages(first=json_data)
+        for json_data in re.findall(r'\d+-\d+|\d+', json_data):
+            if '-' in json_data:
+                first, last = (number.strip() for number in json_data.split('-'))
+                if len(last) < len(first):
+                    last = first[:- len(last)] + last
+                pages.append(Pages(first=first, last=last))
+            else:
+                pages.append(Pages(first=json_data))
+        return pages
 
     def parse_names(self, json_data):
         names = []
