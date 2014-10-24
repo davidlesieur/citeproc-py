@@ -4,7 +4,6 @@ from citeproc.py2compat import *
 
 import re
 import unicodedata
-import sys
 
 from functools import reduce, cmp_to_key
 from operator import itemgetter
